@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.libraryforusers.dao.BooklistDao">
+
+    <insert id="add">
+        insert into library_booklist (`book_id`) values (#{bookId})
+    </insert>
+
+    <select id="check" resultType="com.libraryforusers.domain.BooklistDO">
+        select
+        `booklist_id`,`book_id`,`lending_status`,`create_time`,`update_time`
+        from library_booklist
+        <where>
+            exist_boolean = 1
+            <if test="bookId != null">and book_id = #{bookId}</if>
+        </where>
+    </select>
+
+    <select id="checkId" resultType="com.libraryforusers.domain.BooklistDO">
+        select
+        `booklist_id`,`book_id`,`lending_status`,`create_time`,`update_time`
+        from library_booklist
+        <where>
+            exist_boolean = 1
+            <if test="booklistId != null">and booklist_id = #{booklistId}</if>
+        </where>
+    </select>
+
+    <update id="update">
+        update library_booklist
+        <set>
+            <if test="lendingStatus != null">lending_status = #{lendingStatus}</if>
+        </set>
+        where exist_boolean = 1 and booklist_id = #{booklistId}
+    </update>
+
+    <update id="delete">
+        update library_booklist
+        <set>
+            exist_boolean = 0
+        </set>
+        where exist_boolean = 1 and booklist_id = #{booklistId}
+    </update>
+
+    <select id="countLendingStatus" resultType="int">
+        select count(*) from library_booklist
+        <where>
+            <if test="lendingStatus != null">lending_status = #{lendingStatus}</if>
+        </where>
+    </select>
+
+</mapper>

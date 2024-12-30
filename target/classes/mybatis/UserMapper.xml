@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.libraryforusers.dao.UserDao">
+
+    <insert id="add">
+        insert into library_users
+        (
+            `user_name`,
+            `password`,
+            `phone_num`,
+            `email`
+        )
+        values
+            (
+                #{userName},
+                #{password},
+                #{phoneNum},
+                #{email}
+            )
+    </insert>
+
+    <delete id="remove">
+        delete from library_users where user_id = #{userId}
+    </delete>
+
+    <update id="update">
+        update library_users
+        <set>
+            <if test="userName != null and userName !=''">`user_name` = #{userName},</if>
+            <if test="phoneNum != null and phoneNum !='' and phoneNum != 0">`phone_num` = #{phoneNum},</if>
+            <if test="password != null and password !=''">`password` = #{password},</if>
+            <if test="email != null and email != ''">`email` = #{email},</if>
+            <if test="historyStatus != null and historyStatus != '' or historyStatus == 0">`history_status` = #{historyStatus}</if>
+        </set>
+        where user_id = #{userId}
+    </update>
+
+    <update id="updateAdmin">
+        update library_users
+        <set>
+            <if test="administrator != null">`administrator` = #{administrator}</if>
+        </set>
+        where user_id = #{userId}
+    </update>
+
+    <select id="count" resultType="int">
+        select count(*) from library_users
+        <where>
+            <if test="userName != null">and user_name = #{userName}</if>
+            <if test="phoneNum != null">and phone_num = #{phoneNum}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+        </where>
+    </select>
+
+    <select id="checkAll" resultType="com.libraryforusers.domain.UserDO">
+        select
+        `user_id`,`user_name`,`phone_num`,`password`,`administrator`,`history_status`,`create_time`,`update_time`,`email`
+        from library_users
+    </select>
+
+    <select id="check" resultType="com.libraryforusers.domain.UserDO">
+        select
+        `user_id`,`user_name`,`phone_num`,`password`,`administrator`,`history_status`,`create_time`,`update_time`,`email`
+        from library_users
+        <where>
+            <if test="userName != null">and user_name = #{userName}</if>
+            <if test="phoneNum != null">and phone_num = #{phoneNum}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+        </where>
+    </select>
+
+    <select id="checkLike" resultType="com.libraryforusers.domain.UserDO">
+        select
+        u.`user_id`,u.`user_name`,u.`phone_num`,u.`password`,u.`administrator`,u.`history_status`,u.`create_time`,u.`update_time`,u.`email`,
+        sum(case when h.overdue_status = 1 then 1 else 0 end) overdue_count
+        from library_users u
+        left join library_history h on h.user_id = u.user_id
+        <where>
+            <if test="userName != null">or u.user_name like concat('%',#{userName},'%')</if>
+            <if test="phoneNum != null">or u.phone_num like concat('%',#{phoneNum},'%')</if>
+            <if test="userId != null">or u.user_id = #{userId}</if>
+        </where>
+        group by user_id
+        <if test="page != null">limit #{page}, 10</if>
+    </select>
+
+    <select id="countLike" resultType="int">
+        select count(*) from library_users
+        <where>
+            <if test="userName != null">or user_name like concat('%',#{userName},'%')</if>
+            <if test="phoneNum != null">or phone_num like concat('%',#{phoneNum},'%')</if>
+            <if test="userId != null">or user_id = #{userId}</if>
+        </where>
+    </select>
+
+    <select id="countBorrowUser" resultType="Map">
+        select
+        count(borrow_times) borrowCount,
+        count(`user_id`) - count(borrow_times) notBorrowCount
+        from(
+            select u.`user_id`, borrow_times
+            from library_users u
+            left join(
+                select `user_id`, count(*) borrow_times
+                from library_history
+                <where>
+                    <if test="date != null">and 3 > datediff(#{date}, begin_time)</if>
+                    <if test="date != null">and datediff(#{date}, begin_time) >= 0</if>
+                </where>
+                group by `user_id`
+            ) h on u.`user_id` = h.user_id
+        <where>
+            <if test="date != null">and #{date} >= u.`create_time`</if>
+        </where>
+        ) userBorrowTimeTable
+    </select>
+
+    <select id="countHistoryStatus" resultType="Map">
+        select concat(`history_status`,"本") name, count(`user_id`) `value`
+        from library_users
+        group by `history_status`
+    </select>
+
+</mapper>

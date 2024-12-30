@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.libraryforusers.dao.HistoryDao">
+
+    <insert id="add">
+        insert into library_history
+            (
+                `book_id`,
+                `booklist_id`,
+                `user_id`
+            )
+        values
+            (
+                #{bookId},
+                #{booklistId},
+                #{userId}
+            )
+    </insert>
+
+    <select id="check" resultType="com.libraryforusers.domain.HistoryDO">
+        select
+        `history_id`,`book_id`,`booklist_id`,`user_id`,`begin_time`,`end_time`,`history_status`,`overdue_status`
+        from library_history
+        <where>
+            <if test="booklistId != null">and booklist_id = #{booklistId}</if>
+            <if test="historyId != null">and history_id = #{historyId}</if>
+        </where>
+        order by `history_id` desc
+        limit 1
+    </select>
+
+    <update id="update">
+        update library_history
+        <set>
+            <if test="endTime != null">`end_time` = #{endTime},</if>
+            <if test="historyStatus != null">`history_status` = #{historyStatus},</if>
+            <if test="overdueStatus !=null">`overdue_status` = #{overdueStatus}</if>
+        </set>
+        where history_id = #{historyId}
+    </update>
+
+    <update id="updateOverdue">
+        update library_history
+        <set>
+            `overdue_status` = 1
+        </set>
+        where
+            `history_status` = 0
+            and `overdue_status` = 0
+            and datediff(current_timestamp,`begin_time`) > #{maxBorrowDay}
+    </update>
+
+    <select id="checkBook" resultType="com.libraryforusers.domain.HistoryDO">
+        select
+        `history_id`,`book_id`,`booklist_id`,`user_id`,`begin_time`,`end_time`,`history_status`,`overdue_status`
+        from library_history
+        <where>
+            <if test="bookId != null">and book_id = #{bookId}</if>
+        </where>
+        order by `history_id` desc
+        limit 10
+    </select>
+
+    <select id="checkLike" resultType="com.libraryforusers.domain.HistoryDO">
+        select
+        `history_id`,`book_id`,`booklist_id`,`user_id`,`begin_time`,`end_time`,`history_status`,`overdue_status`
+        from library_history
+        <where>
+            <if test="historyId != null and historyId != ''">or history_id = #{historyId}</if>
+            <if test="bookId != null and bookId != ''">or book_id = #{bookId}</if>
+            <if test="booklistId != null and booklistId != ''">or booklist_id = #{booklistId}</if>
+            <if test="userId != null and userId != ''">or user_id = #{userId}</if>
+            <if test="historyStatus != null">and history_status = #{historyStatus}</if>
+            <if test="overdueStatus != null">and overdue_status = #{overdueStatus}</if>
+        </where>
+        <if test="page != null">limit #{page}, 10</if>
+    </select>
+
+    <select id="checkLikeInfo" resultType="Map">
+        select
+        h.`history_id`,b.`book_name`,h.`booklist_id`,u.`user_name`,date_format(h.`begin_time`, '%Y-%m-%d %H:%i:%s') beginTime ,date_format(h.`end_time`, '%Y-%m-%d %H:%i:%s') endTime ,h.`history_status`,h.`overdue_status`
+        from library_history h, library_books b, library_users u
+        <where>
+            <trim prefix="and (" suffix=")" prefixOverrides="and|or">
+                <if test="historyId != null and historyId != ''">or h.history_id = #{historyId}</if>
+                <if test="bookId != null and bookId != ''">or b.book_id = #{bookId}</if>
+                <if test="booklistId != null and booklistId != ''">or h.booklist_id = #{booklistId}</if>
+                <if test="userId != null and userId != ''">or u.user_id = #{userId}</if>
+            </trim>
+            <if test="historyStatus != null">and h.history_status = #{historyStatus}</if>
+            <if test="overdueStatus != null">and h.overdue_status = #{overdueStatus}</if>
+            and h.book_id  = b.book_id
+            and h.user_id = u.user_id
+        </where>
+        <if test="page != null">limit #{page}, 10</if>
+    </select>
+
+    <select id="countLike" resultType="int">
+        select count(*) from library_history
+        <where>
+            <if test="historyId != null and historyId != ''">or history_id = #{historyId}</if>
+            <if test="bookId != null and bookId != ''">or book_id = #{bookId}</if>
+            <if test="booklistId != null and booklistId != ''">or booklist_id = #{booklistId}</if>
+            <if test="userId != null and userId != ''">or user_id = #{userId}</if>
+            <if test="historyStatus != null">and history_status = #{historyStatus}</if>
+            <if test="overdueStatus != null">and overdue_status = #{overdueStatus}</if>
+        </where>
+    </select>
+
+    <select id="overdueInfo" resultType="Map">
+        select
+        u.`user_name` userName, u.`email`,
+        group_concat(b.`book_name` separator '#') books,
+        group_concat(datediff(current_timestamp,h.`begin_time`)-#{maxBorrowDay} separator '#') overdueDay
+        from library_history h, library_users u, library_books b
+        where h.`overdue_status` = 1 and h.`history_status` = 0 and h.`book_id` = b.`book_id` and h.`user_id` = u.`user_id`
+        group by u.`user_name`
+    </select>
+
+    <select id="checkTopNum" resultType="Map">
+        select
+        b.`book_name` bookName, count(h.`history_id`) num
+        from library_books b left join library_history h
+        on b.`book_id` = h.`book_id` group by bookName
+        order by num desc limit 6
+    </select>
+
+    <select id="countWeekLending" resultType="Map">
+        select
+        date_format(`begin_time`, '%w') dayWeek, count(`history_id`) num
+        from library_history
+        where 7 > datediff(current_timestamp, `begin_time`)
+        group by dayWeek
+        order by `begin_time` desc
+    </select>
+
+    <select id="countWeekReturning" resultType="Map">
+        select
+        date_format(`end_time`, '%w') dayWeek, count(`history_id`) num
+        from library_history
+        where `end_time` is not null
+        and 7 > datediff(current_timestamp, `begin_time`)
+        group by dayWeek
+        order by `end_time` desc
+    </select>
+
+    <select id="getStatusOverdue" resultType="Map">
+        select `history_status` historyStatus, `overdue_status` overdueStatus, count(`history_id`) num
+        from library_history
+        group by historyStatus, overdueStatus
+    </select>
+
+</mapper>

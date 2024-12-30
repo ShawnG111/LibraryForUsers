@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.libraryforusers.dao.BookDao">
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="bookId">
+        insert into library_books
+            (
+                `book_name`,
+                `author`,
+                `type_id`,
+                `storage_num`,
+                `total_num`,
+                `image`
+            )
+        values
+            (
+                #{bookName},
+                #{author},
+                #{typeId},
+                #{storageNum},
+                #{totalNum},
+                #{image}
+            )
+    </insert>
+
+    <select id="check" resultType="com.libraryforusers.domain.BookDO">
+        select
+        `book_id`,`book_name`,`author`,`type_id`,`storage_num`,`total_num`,`image`
+        from library_books
+        <where>
+            <if test="bookId != null">and book_id = #{bookId}</if>
+        </where>
+    </select>
+
+    <select id="checkLike" resultType="com.libraryforusers.domain.BookDO">
+        select
+        `book_id`,`book_name`,`author`,`type_id`,`storage_num`,`total_num`,`image`
+        from library_books
+        <where>
+            <if test="bookName != null and bookName != ''">or book_name like concat('%',#{bookName},'%')</if>
+            <if test="author != null and author != ''">or author like concat('%',#{author},'%')</if>
+            <if test="bookId != null and bookId != ''">or book_id = #{bookId}</if>
+            <if test="typeId != null and typeId != ''">or type_id = #{typeId}</if>
+        </where>
+        <if test="page != null">limit #{page}, 10</if>
+    </select>
+
+    <select id="countLike" resultType="int">
+        select count(*) from library_books
+        <where>
+            <if test="bookName != null and bookName != ''">or book_name like concat('%',#{bookName},'%')</if>
+            <if test="author != null and author != ''">or author like concat('%',#{author},'%')</if>
+            <if test="bookId != null and bookId != ''">or book_id = #{bookId}</if>
+            <if test="typeId != null and typeId != ''">or type_id = #{typeId}</if>
+        </where>
+    </select>
+
+    <select id="count" resultType="int">
+        select count(*) from library_books
+        <where>
+            <if test="bookName != null and bookName != ''">and book_name = #{bookName}</if>
+        </where>
+    </select>
+
+    <select id="getStorage" resultType="int">
+        select `storage_num` from library_books
+        <where>
+            <if test="bookId != null">and book_id = #{bookId}</if>
+        </where>
+    </select>
+
+    <select id="getTotal" resultType="int">
+        select `total_num` from library_books
+        <where>
+            <if test="bookId != null">and book_id = #{bookId}</if>
+        </where>
+    </select>
+
+    <update id="updateStorage">
+        update library_books
+        <set>
+            <if test="storageNum != null">storage_num = #{storageNum}</if>
+        </set>
+        where book_id = #{bookId}
+    </update>
+
+    <update id="updateTotal">
+        update library_books
+        <set>
+            <if test="totalNum != null">total_num = #{totalNum}</if>
+        </set>
+        where book_id = #{bookId}
+    </update>
+
+    <update id="update">
+        update library_books
+        <set>
+            <if test="bookName != null and bookName != ''">`book_name` = #{bookName},</if>
+            <if test="author != null and author != ''">`author` = #{author},</if>
+            <if test="typeId != null and typeId != '' or typeId == 0">`type_id` = #{typeId},</if>
+            <if test="image != null and image != ''">`image` = #{image}</if>
+        </set>
+        where book_id = #{bookId}
+    </update>
+
+</mapper>

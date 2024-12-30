@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主菜单</title>
+</head>
+<body>
+<div class="menu-container">
+    <div class="menu-header">
+        <h1>菜单</h1>
+        <h2 th:text="'你好, ' + ${userName} + '！'"></h2>
+    </div>
+    <div class="menu-content">
+        <p class="menu-message" th:text="${message}"></p>
+        <div class="menu-items">
+            <a href="user" class="menu-item">
+                <span class="menu-icon">👤</span>
+                用户管理
+            </a>
+            <a href="book" class="menu-item">
+                <span class="menu-icon">📚</span>
+                书籍查看
+            </a>
+            <a href="history" class="menu-item">
+                <span class="menu-icon">🕘</span>
+                历史记录
+            </a>
+            <a href="/logout" class="menu-item logout">
+                <span class="menu-icon">🚪</span>
+                退出登录
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
