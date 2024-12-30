@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>书籍列表</title>
+</head>
+<body>
+<div class="container">
+  <h1>书籍列表</h1>
+  <a href="/menu">返回主菜单</a>
+  <p id="message"></p>
+  <input type="text" name="checkString" id="checkString" placeholder="输入书名或作者查询">
+  <input type="button" value="查询" id="submit">
+  <select name="rows" id="rows">
+    <option value="10">每页展示10条数据</option>
+    <option value="5">每页展示5条数据</option>
+    <option value="20">每页展示20条数据</option>
+  </select>
+  <table>
+    <thead>
+    <tr>
+      <th>书籍序号</th>
+      <th>书籍名称</th>
+      <th>作者</th>
+      <th>所属分类序号</th>
+      <th>库存数量</th>
+      <th>总数量</th>
+      <th>操作</th>
+    </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="pagination">
+    <input type="button" value="上一页" id="lastPage"/>
+    <span>第 <span th:text="${page}" id="page"></span> 页</span>
+    <input type="button" value="下一页" id="nextPage"/>
+  </div>
+</div>
+</body>
+
+<script src="/js/jquery_1.10.2.min.js"></script>
+<script src="/js/book_list.js"></script>
+</html>

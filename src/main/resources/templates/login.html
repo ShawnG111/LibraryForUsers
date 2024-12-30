@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+<div class="container">
+    <h1>登录</h1>
+    <form>
+        <label for="phoneNum">电话号码：</label>
+        <input type="text" id="phoneNum" name="phoneNum" placeholder="请输入电话号码" />
+        <label for="password">密码：</label>
+        <input type="password" id="password" name="password" placeholder="请输入密码" />
+        <label for="verifyCode">验证码：</label>
+        <input type="text" id="verifyCode" name="verifyCode" placeholder="请输入图形验证码" />
+        <img src="" id="verifyPic" alt="图形验证码">
+        <p id="message"></p>
+        <input type="button" value="登录" id="submit" />
+        <p><a href="registerPage">点击此处注册</a></p>
+        <input type="hidden" th:value="${register}" id="register"/>
+    </form>
+</div>
+</body>
+
+<script src="/js/jquery_1.10.2.min.js"></script>
+<script src="/js/login_verify_code.js"></script>
+</html>
