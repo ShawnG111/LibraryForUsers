@@ -22,7 +22,9 @@ import java.util.Map;
 @RequestMapping("/book")
 public class BookController {
     @Autowired
-    private RestTemplate restTemplate;
+    private RestTemplate loadBalancedRestTemplate;
+
+    public static final String DATA_CENTER_URL = "http://admin-center";
 
     @RequestMapping("")
     public String bookList(Model model) {
@@ -50,7 +52,7 @@ public class BookController {
     @RequestMapping("/getBookList")
     @ResponseBody
     public String getBookList(String checkString, int page, int rows) {
-        return restTemplate.getForObject("http://localhost:80/api/getBookList?checkString="+checkString+"&page="+page+"&rows="+rows, String.class);
+        return loadBalancedRestTemplate.getForObject(DATA_CENTER_URL+"/api/getBookList?checkString="+checkString+"&page="+page+"&rows="+rows, String.class);
     }
 
 }

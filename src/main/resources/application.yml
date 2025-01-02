@@ -1,4 +1,6 @@
 server:
+  application:
+    name: client-center
   session-timeout: 1800
 #    tomcat:
 #        max-threads: 1000
@@ -9,6 +11,8 @@ server:
 #  basic:
 #    enabled: false
 spring:
+  application:
+    name: client-center
   thymeleaf:
     mode: LEGACYHTML5
     cache: false
@@ -28,6 +32,20 @@ spring:
     host: 127.0.0.1
     port: 6379
     database: 0
+
+  cloud:
+    consul:
+      discovery:
+        instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
+        service-name: client-center
+        health-check-interval: 1s
+        enabled: true
+        prefer-ip-address: true
+      host: 192.168.139.128
+      port: 8500
+    loadbalancer:
+      enabled: true
+
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
@@ -38,3 +56,9 @@ mybatis:
 lib:
   maxBorrowNum: 3
   maxBorrowDay: 7
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
