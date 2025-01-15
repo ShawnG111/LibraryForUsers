@@ -35,13 +35,16 @@ spring:
 
   cloud:
     consul:
+      config:
+        format: YAML
+        profileSeparator: ','
       discovery:
         instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${random.value}}}
         service-name: client-center
         health-check-interval: 1s
         enabled: true
         prefer-ip-address: true
-      host: 192.168.139.128
+      host: 192.168.139.129
       port: 8500
     loadbalancer:
       enabled: true
@@ -62,3 +65,7 @@ management:
     web:
       exposure:
         include: "*"
+
+feign:
+  circuitBreaker:
+    enabled: true

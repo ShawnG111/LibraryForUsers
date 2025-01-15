@@ -2,6 +2,7 @@ package com.libraryforusers.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.libraryforusers.service.ApiService;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -21,8 +22,11 @@ import java.util.Map;
 @Controller
 @RequestMapping("/book")
 public class BookController {
+
     @Autowired
     private RestTemplate loadBalancedRestTemplate;
+    @Autowired
+    private ApiService apiService;
 
     public static final String DATA_CENTER_URL = "http://admin-center";
 
@@ -51,8 +55,8 @@ public class BookController {
 
     @RequestMapping("/getBookList")
     @ResponseBody
-    public String getBookList(String checkString, int page, int rows) {
-        return loadBalancedRestTemplate.getForObject(DATA_CENTER_URL+"/api/getBookList?checkString="+checkString+"&page="+page+"&rows="+rows, String.class);
+    public Map getBookList(String checkString, int page, int rows) {
+        return apiService.getBookList(checkString, page, rows);
     }
 
 }
